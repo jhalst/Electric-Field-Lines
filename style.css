@@ -1,0 +1,26 @@
+body {
+  margin: 0;
+  background-color: black;
+}
+
+canvas {
+  display: block;
+}
+
+span {
+  padding: 12px;
+}
+
+h2 {
+  color: orangered;
+  text-align: center;
+}
+
+p {
+  color: orangered;
+  text-align: center;
+}
+
+div {
+  text-align: center;
+}
