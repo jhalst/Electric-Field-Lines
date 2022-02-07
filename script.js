@@ -1,31 +1,25 @@
 // each charge of the form [x, y, charge]
+let charges = [];
+let sliders = [];
 
 function askForPoints() {
   let points = window.prompt("How many points do you want to graph?");
-  sliders = [];
   for (var i = 0; i < points; i++) {
-    sliders.push(document.createElement('div'));
-    sliders.push([]);
-    createSlider(10, window.innerWidth - 10, i);
-    createSlider(10, window.innerHeight - 10, i);
-    createSlider(-200, 200, i);
-    document.body.appendChild(sliders[2*i]);
+    slidersForCharge(i);
   }
-  charges = [];
   for (let i = 0; i < points; i++) {
     let currentSliders = sliders[2*i + 1];
     charges.push([JSON.parse(currentSliders[0].value), JSON.parse(currentSliders[1].value), JSON.parse(currentSliders[2].value)]);
   }
-  console.log(charges);
 }
 
-// slider.oninput = function() {
-//   output.innerHTML = this.value;
-//   drawFieldLines(charges);
-// }
-
-window.onResize = function () {
-  drawFieldLines();
+function slidersForCharge(i) {
+  sliders.push(document.createElement('div'));
+  sliders.push([]);
+  createSlider(10, window.innerWidth - 10, i);
+  createSlider(10, window.innerHeight - 10, i);
+  createSlider(-200, 200, i);
+  document.body.appendChild(sliders[2*i]);
 }
 
 function createSlider(min, max, i) {
@@ -114,4 +108,8 @@ function calculatePath(startPoint) {
   }
   fieldStrength = [fieldStrength[0] / Math.sqrt(fieldStrength[0] ** 2 + fieldStrength[1] ** 2), fieldStrength[1] / Math.sqrt(fieldStrength[0] ** 2 + fieldStrength[1] ** 2)];
   return [startPoint].concat(calculatePath([startPoint[0] + fieldStrength[0], startPoint[1] + fieldStrength[1], startPoint[2]]));
+}
+
+window.onResize = function () {
+  drawFieldLines();
 }
