@@ -2,6 +2,7 @@
 let charges = [];
 let sliders = [];
 
+// create sliders to control the charges
 function askForPoints() {
   let points = window.prompt("How many points do you want to graph?");
   for (var i = 0; i < points; i++) {
@@ -32,6 +33,7 @@ function createSlider(min, max, i) {
   sliders[2 * i + 1].push(newSlider);
 }
 
+// draw field lines when a slider is changed
 function redrawLines(e) {
   index = findElement(e);  
   charges[index[0]][index[1]] = JSON.parse(e.target.value);
@@ -41,44 +43,23 @@ function redrawLines(e) {
 function findElement(e) {
   let i = 1
   while (true) {
-    for (var j = 0; j < 3; j++) {
-      if (sliders[i][j] === e.target) {
+    for (var j = 0; j < 3; j++)
+      if (sliders[i][j] === e.target)
         return [.5 * (i - 1), j];
-      }
-    }
     i += 2;
   }
 }
 
 function drawFieldLines() {
-  let paths = [];
-  for (let i = 0; i < charges.length; i++) {
-    let startAngle = 6.28318531 * Math.random();
-    let angleStep = 6.28318531 / Math.floor(1 + Math.abs(charges[i][2]));
-    for (let j = 0; j <= Math.abs(charges[i][2]); j++) {
-      paths.push(calculatePath([charges[i][0] + 10 * Math.cos(startAngle + j * angleStep), charges[i][1] + 10 * Math.sin(startAngle + j * angleStep), charges[i][2]]));
-    }
-  }
-  // paths array of the form [[[x11, y11], [x12, y12], ...], [[x21, y21], [x22, y22], ...], ...]
+  let paths = calculateFieldLines();
+
   let c = document.getElementById('lines');
   c.width = window.innerWidth;
   c.height = window.innerHeight;
-  document.body.appendChild(c);
   let ctx = c.getContext('2d');
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(0, 0, c.width, c.height);
+  //ctx.fillRect(0, 0, c.width, c.height);
   for (let i = 0; i < paths.length; i++) {
-    ctx.beginPath();
-    if (Math.sign(paths[i][0][2]) === 1) {
-      ctx.strokeStyle = "#900000"
-    } else {
-      ctx.strokeStyle = "#000090"
-    }
-    ctx.moveTo(paths[i][0][0], paths[i][0][1]);
-    for (var j = 0; j < paths[i].length; j++) {
-      ctx.lineTo(paths[i][j][0], paths[i][j][1]);
-    }
-    ctx.stroke();
+    drawPath(paths, i);
   }
   for (var i = 0; i < charges.length; i++) {
     ctx.beginPath();
@@ -90,6 +71,17 @@ function drawFieldLines() {
     ctx.arc(charges[i][0], charges[i][1], 10, 10, 0, 6.283);
     ctx.fill();
   }
+}
+// creates paths array of the form [[[x11, y11], [x12, y12], ...], [[x21, y21], [x22, y22], ...], ...]
+function calculateFieldLines() {
+  let paths = [];
+  for (let i = 0; i < charges.length; i++) {
+    let startAngle = 6.28318531 * Math.random();
+    let angleStep = 6.28318531 / Math.floor(1 + Math.abs(charges[i][2]));
+    for (let j = 0; j <= Math.abs(charges[i][2]); j++)
+      paths.push(calculatePath([charges[i][0] + 10 * Math.cos(startAngle + j * angleStep), charges[i][1] + 10 * Math.sin(startAngle + j * angleStep), charges[i][2]]));
+  }
+  return paths;
 }
 
 function calculatePath(startPoint) {
@@ -108,6 +100,21 @@ function calculatePath(startPoint) {
   }
   fieldStrength = [fieldStrength[0] / Math.sqrt(fieldStrength[0] ** 2 + fieldStrength[1] ** 2), fieldStrength[1] / Math.sqrt(fieldStrength[0] ** 2 + fieldStrength[1] ** 2)];
   return [startPoint].concat(calculatePath([startPoint[0] + fieldStrength[0], startPoint[1] + fieldStrength[1], startPoint[2]]));
+}
+
+function drawPath(paths, i) {
+  ctx = document.getElementById('lines').getContext('2d');
+  ctx.beginPath();
+  if (Math.sign(paths[i][0][2]) === 1) {
+    ctx.strokeStyle = "#900000"
+  } else {
+    ctx.strokeStyle = "#000090"
+  }
+  ctx.moveTo(paths[i][0][0], paths[i][0][1]);
+  for (var j = 0; j < paths[i].length; j++) {
+    ctx.lineTo(paths[i][j][0], paths[i][j][1]);
+  }
+  ctx.stroke();
 }
 
 window.onResize = function () {
