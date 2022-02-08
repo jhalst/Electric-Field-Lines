@@ -20,7 +20,7 @@ function slidersForCharge(i) {
   createSlider(10, window.innerWidth - 10, i);
   createSlider(10, window.innerHeight - 10, i);
   createSlider(-200, 200, i);
-  document.body.appendChild(sliders[2*i]);
+  document.body.insertBefore(sliders[2*i], document.getElementById('lines'));
 }
 
 function createSlider(min, max, i) {
@@ -57,7 +57,6 @@ function drawFieldLines() {
   c.width = window.innerWidth;
   c.height = window.innerHeight;
   let ctx = c.getContext('2d');
-  //ctx.fillRect(0, 0, c.width, c.height);
   for (let i = 0; i < paths.length; i++) {
     drawPath(paths, i);
   }
@@ -117,6 +116,14 @@ function drawPath(paths, i) {
   ctx.stroke();
 }
 
-window.onResize = function () {
+window.onresize = function () {
+  updateSliders();
   drawFieldLines();
+}
+
+function updateSliders() {
+  for (let i = 0; i < sliders.length; i += 2) {
+    sliders[i + 1][0].max = window.innerWidth;
+    sliders[i + 1][1].min = window.innerHeight;
+  } 
 }
