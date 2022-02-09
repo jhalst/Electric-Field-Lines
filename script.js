@@ -25,15 +25,16 @@ function slidersForCharge(i) {
   createSlider(10, 10, i);
   createSlider(10, 10, i);
   createSlider(-200, 200, i);
-  document.body.insertBefore(sliders[i], document.getElementById('lines'));
+  document.getElementById('controls').appendChild(sliders[i]);
 }
-
+//.insertBefore(sliders[i], document.getElementById('lines'));
 function createSlider(min, max, i) {
   newSlider = document.createElement('input');
   newSlider.type = 'range';
   newSlider.min = min;
   newSlider.max = max;
   newSlider.addEventListener("input", redrawLines);
+  newSlider.top = (50 + 10*i) + "px";
   sliders[i].appendChild(newSlider);
   //sliders[2 * i + 1].push(newSlider);
 }
@@ -81,7 +82,7 @@ function calculateFieldLines() {
     let startAngle = TAU * Math.random();
     let angleStep = TAU / Math.floor(1 + Math.abs(charges[i][2]));
     for (let j = 0; j <= Math.abs(charges[i][2]); j++)
-      paths.push(calculatePath([charges[i][0] + 10 * Math.cos(startAngle + j * angleStep), charges[i][1] + 10 * Math.sin(startAngle + j * angleStep), charges[i][2]]));
+      paths.push(calculatePath([charges[i][0] + Math.sqrt(Math.abs(charges[i][2])) * Math.cos(startAngle + j * angleStep), charges[i][1] + Math.sqrt(Math.abs(charges[i][2])) * Math.sin(startAngle + j * angleStep), charges[i][2]]));
   }
   return paths;
 }
@@ -91,8 +92,8 @@ function calculatePath(startPoint) {
     return [startPoint];
   let fieldStrength = [0, 0];
   for (var i = 0; i < charges.length; i++) {
-    let distanceSquare = (startPoint[0] - charges[i][0]) ** 2 + (startPoint[1] - charges[i][1]) ** 2;
-    if (distanceSquare < 25)
+    let distanceSquare = (startPoint[0] - charges[i][0])**2 + (startPoint[1] - charges[i][1])**2;
+    if (distanceSquare < Math.abs(charges[i][2]) - 1)
       return [startPoint];
     addStrength(startPoint, fieldStrength, charges[i], distanceSquare);
   }
@@ -127,6 +128,6 @@ function drawCharge(charge) {
     ctx.fillStyle = "#900000";
   else
     ctx.fillStyle = "#000090";
-  ctx.arc(charge[0], charge[1], 10, 10, 0, 6.283);
+  ctx.arc(charge[0], charge[1], Math.sqrt(Math.abs(charge[2])), Math.sqrt(Math.abs(charge[2])), 0, TAU);
   ctx.fill();
 }

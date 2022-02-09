@@ -21,6 +21,9 @@ p {
   text-align: center;
 }
 
-div {
-  text-align: center;
+#controls {
+  position: absolute;
+  width: 400px;
+  right: 0;
+  background-color: #11111188;
 }
