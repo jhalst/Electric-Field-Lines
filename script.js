@@ -21,13 +21,12 @@ function askForPoints() {
 
 function slidersForCharge(i) {
   sliders.push(document.createElement('div'));
-  //sliders.push([]);
   createSlider(10, 10, i);
   createSlider(10, 10, i);
   createSlider(-200, 200, i);
   document.getElementById('controls').appendChild(sliders[i]);
 }
-//.insertBefore(sliders[i], document.getElementById('lines'));
+
 function createSlider(min, max, i) {
   newSlider = document.createElement('input');
   newSlider.type = 'range';
@@ -36,7 +35,6 @@ function createSlider(min, max, i) {
   newSlider.addEventListener("input", redrawLines);
   newSlider.top = (50 + 10*i) + "px";
   sliders[i].appendChild(newSlider);
-  //sliders[2 * i + 1].push(newSlider);
 }
 
 function resize() {
@@ -66,14 +64,9 @@ function findElement(e) {
 
 function updateCanvas() {
   let paths = calculateFieldLines();
-  let c = document.getElementById('lines')
-  c.getContext('2d').clearRect(0, 0, c.width, c.height);
-  for (let i = 0; i < paths.length; i++) {
-    drawPath(paths, i);
-  }
-  for (var i = 0; i < charges.length; i++) {
-    drawCharge(charges[i]);
-  }
+  document.getElementById('lines').getContext('2d').clearRect(0, 0, c.width, c.height);
+  for (let i = 0; i < paths.length; i++)  drawPath(paths, i);
+  for (var i = 0; i < charges.length; i++)  drawCharge(charges[i]);
 }
 
 // creates paths array of the form [[[x11, y11, v11], [x12, y12, v12], ...], [[x21, y21, v21], [x22, y22, v21], ...], ...]
@@ -84,18 +77,18 @@ function calculateFieldLines() {
     let radius = Math.sqrt(Math.abs(charges[i][2]));
     for (let j = 0; j <= Math.abs(charges[i][2]); j++) {
       angle +=  TAU / Math.floor(1 + Math.abs(charges[i][2]));
-      if (!alreadyGenerated(paths, charges[i], radius, angle)) paths.push(calculatePath([charges[i][0] + radius * Math.cos(angle), charges[i][1] + radius * Math.sin(angle), charges[i][2]]));
+      let newPoint = [charges[i][0] + radius * Math.cos(angle), charges[i][1] + radius * Math.sin(angle), charges[i][2]];
+      if (!alreadyGenerated(paths, charges[i], newPoint)) paths.push(calculatePath(newPoint));
     }
   }
   return paths;
 }
 
-function alreadyGenerated(paths, charge, radius, angle) {
+function alreadyGenerated(paths, charge, newPoint) {
   // goes through already existing paths and tests if any of them ends within the charge, and if a path does, tests if it is close enough for a path at angle to be redundant
-  let pointTested = [charge[0] + radius * Math.cos(angle), charge[1] + radius * Math.sin(angle)];
   for (let path of paths)
     if ((path.at(-1)[0] - charge[0])**2 + (path.at(-1)[1] - charge[1])**2 < Math.abs(charge[2] - 1))
-      if ((path.at(-1)[0] - pointTested[0])**2 + (path.at(-1)[1] - pointTested[1])**2 < 1 + Math.abs(charge[2])**(-1)) return true;
+      if ((path.at(-1)[0] - newPoint[0])**2 + (path.at(-1)[1] - newPoint[1])**2 < 1 + Math.abs(charge[2])**(-1)) return true;
   return false;
 }
 
@@ -124,7 +117,8 @@ function drawPath(paths, i) {
   let ctx = document.getElementById('lines').getContext('2d');
   for (var j = 0; j < paths[i].length - 1; j++) {
     ctx.beginPath();
-    let sigmoid = 1 / (1 + Math.E ** -paths[i][j][2]);
+    // .13 has no particular significance, just makes the color change at a nice looking rate
+    let sigmoid = 1 / (1 + 0.13 ** paths[i][j][2]);
     ctx.strokeStyle = 'rgb(' + (250 * sigmoid) + ',0,' + (250 - 250 * sigmoid) + ')';
     ctx.moveTo(paths[i][j][0], paths[i][j][1]);
     ctx.lineTo(paths[i][j + 1][0], paths[i][j + 1][1]);
