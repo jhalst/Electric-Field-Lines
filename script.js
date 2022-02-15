@@ -1,7 +1,7 @@
 // each charge of the form [x, y, charge]
 let charges = [];
 let sliders = [];
-const TAU = 6.28318531;
+const TAU = 2 * Math.PI;
 
 // create sliders to control the charges
 function askForPoints() {
@@ -76,13 +76,12 @@ function updateCanvas() {
   }
 }
 
-// creates paths array of the form [[[x11, y11], [x12, y12], ...], [[x21, y21], [x22, y22], ...], ...]
+// creates paths array of the form [[[x11, y11, v11], [x12, y12, v12], ...], [[x21, y21, v21], [x22, y22, v21], ...], ...]
 function calculateFieldLines() {
   let paths = [];
   for (let i = 0; i < charges.length; i++) {
     let angle = TAU * Math.random();
     let radius = Math.sqrt(Math.abs(charges[i][2]));
-    //let angleStep = TAU / Math.floor(1 + Math.abs(charges[i][2]));
     for (let j = 0; j <= Math.abs(charges[i][2]); j++) {
       angle +=  TAU / Math.floor(1 + Math.abs(charges[i][2]));
       if (!alreadyGenerated(paths, charges[i], radius, angle)) paths.push(calculatePath([charges[i][0] + radius * Math.cos(angle), charges[i][1] + radius * Math.sin(angle), charges[i][2]]));
@@ -90,11 +89,13 @@ function calculateFieldLines() {
   }
   return paths;
 }
-// not finished
+
 function alreadyGenerated(paths, charge, radius, angle) {
+  // goes through already existing paths and tests if any of them ends within the charge, and if a path does, tests if it is close enough for a path at angle to be redundant
+  let pointTested = [charge[0] + radius * Math.cos(angle), charge[1] + radius * Math.sin(angle)];
   for (let path of paths)
-  // tests if there any path ends within the charge, and if a path does, if it is close enough for the path at angle to be redundant
-    if ((path.at(-1)[0] - charge[0])**2 + (path.at(-1)[1] - charge[1])**2 < Math.abs(charge[2] - 1) && (path.at(-1)[0] - charge[0] - radius * Math.cos(angle))**2 + (path.at(-1)[1] - charge[1] - radius * Math.sin(angle))**2 < 1 + Math.abs(charge[2])**(-1)) return true;
+    if ((path.at(-1)[0] - charge[0])**2 + (path.at(-1)[1] - charge[1])**2 < Math.abs(charge[2] - 1))
+      if ((path.at(-1)[0] - pointTested[0])**2 + (path.at(-1)[1] - pointTested[1])**2 < 1 + Math.abs(charge[2])**(-1)) return true;
   return false;
 }
 
@@ -102,13 +103,15 @@ function calculatePath(startPoint) {
   if (startPoint[1] > window.innerHeight || startPoint[1] < 0 || startPoint[0] > window.innerWidth || startPoint[0] < 0)
     return [startPoint];
   let fieldStrength = [0, 0];
+  let voltage = 0;
   for (var i = 0; i < charges.length; i++) {
     let distanceSquare = (startPoint[0] - charges[i][0])**2 + (startPoint[1] - charges[i][1])**2;
     if (distanceSquare < Math.abs(charges[i][2]) - 1) return [startPoint];
     addStrength(startPoint, fieldStrength, charges[i], distanceSquare);
+    voltage += charges[i][2] / Math.sqrt(distanceSquare);
   }
   fieldStrength = [fieldStrength[0] / Math.sqrt(fieldStrength[0] ** 2 + fieldStrength[1] ** 2), fieldStrength[1] / Math.sqrt(fieldStrength[0] ** 2 + fieldStrength[1] ** 2)];
-  return [startPoint].concat(calculatePath([startPoint[0] + fieldStrength[0], startPoint[1] + fieldStrength[1], startPoint[2]]));
+  return [[startPoint[0], startPoint[1], voltage]].concat(calculatePath([startPoint[0] + fieldStrength[0], startPoint[1] + fieldStrength[1], startPoint[2]]));
 }
 
 function addStrength(startPoint, fieldStrength, charge, distanceSquare) {
@@ -119,21 +122,21 @@ function addStrength(startPoint, fieldStrength, charge, distanceSquare) {
 
 function drawPath(paths, i) {
   let ctx = document.getElementById('lines').getContext('2d');
-  ctx.beginPath();
-  if (Math.sign(paths[i][0][2]) === 1) ctx.strokeStyle = "#900000";
-  else ctx.strokeStyle = "#000090";
-  ctx.moveTo(paths[i][0][0], paths[i][0][1]);
-  for (var j = 0; j < paths[i].length; j++) {
-    ctx.lineTo(paths[i][j][0], paths[i][j][1]);
+  for (var j = 0; j < paths[i].length - 1; j++) {
+    ctx.beginPath();
+    let sigmoid = 1 / (1 + Math.E ** -paths[i][j][2]);
+    ctx.strokeStyle = 'rgb(' + (250 * sigmoid) + ',0,' + (250 - 250 * sigmoid) + ')';
+    ctx.moveTo(paths[i][j][0], paths[i][j][1]);
+    ctx.lineTo(paths[i][j + 1][0], paths[i][j + 1][1]);
+    ctx.stroke();
   }
-  ctx.stroke();
 }
 
 function drawCharge(charge) {
   let ctx = document.getElementById('lines').getContext('2d');
   ctx.beginPath();
-  if (Math.sign(charge[2]) === 1) ctx.fillStyle = "#900000";
-  else ctx.fillStyle = "#000090";
+  if (Math.sign(charge[2]) === 1) ctx.fillStyle = "#ff0000";
+  else ctx.fillStyle = "#0000ff";
   ctx.arc(charge[0], charge[1], Math.sqrt(Math.abs(charge[2])), Math.sqrt(Math.abs(charge[2])), 0, TAU);
   ctx.fill();
 }
