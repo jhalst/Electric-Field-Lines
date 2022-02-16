@@ -11,8 +11,7 @@ function askForPoints() {
   }
   for (let i = 0; i < points; i++) {
     let newCharge = [];
-    for (var entry of sliders[i].childNodes)
-      newCharge.push(JSON.parse(entry.value));
+    for (var entry of sliders[i].childNodes)  newCharge.push(JSON.parse(entry.value));
     charges.push(newCharge);
   }
   window.addEventListener('resize', resize)
