@@ -64,7 +64,8 @@ function findElement(e) {
 
 function updateCanvas() {
   let paths = calculateFieldLines();
-  document.getElementById('lines').getContext('2d').clearRect(0, 0, c.width, c.height);
+  let c = document.getElementById('lines');
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
   for (let i = 0; i < paths.length; i++)  drawPath(paths, i);
   for (var i = 0; i < charges.length; i++)  drawCharge(charges[i]);
 }
@@ -75,8 +76,8 @@ function calculateFieldLines() {
   for (let i = 0; i < charges.length; i++) {
     let angle = TAU * Math.random();
     let radius = Math.sqrt(Math.abs(charges[i][2]));
-    for (let j = 0; j <= Math.abs(charges[i][2]); j++) {
-      angle +=  TAU / Math.floor(1 + Math.abs(charges[i][2]));
+    for (let j = 0; j < Math.abs(charges[i][2]); j++) {
+      angle +=  TAU / Math.floor(Math.abs(charges[i][2]));
       let newPoint = [charges[i][0] + radius * Math.cos(angle), charges[i][1] + radius * Math.sin(angle), charges[i][2]];
       if (!alreadyGenerated(paths, charges[i], newPoint)) paths.push(calculatePath(newPoint));
     }
