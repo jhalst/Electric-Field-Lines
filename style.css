@@ -11,19 +11,14 @@ span {
   padding: 12px;
 }
 
-h2 {
-  color: orangered;
-  text-align: center;
-}
-
 p {
-  color: orangered;
+  color: silver;
   text-align: center;
+  margin: 5px;
 }
 
 #controls {
   position: absolute;
   width: 400px;
   right: 0;
-  background-color: #11111188;
 }
