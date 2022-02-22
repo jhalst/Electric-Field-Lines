@@ -15,7 +15,7 @@ function askForPoints() {
       newCharge.push(JSON.parse(entry.value));
     charges.push(newCharge);
   }
-  window.addEventListener('resize', resize)
+  window.addEventListener('resize', resize);
   resize();
 }
 
@@ -64,7 +64,7 @@ function findElement(e) {
 
 function updateCanvas() {
   let paths = calculateFieldLines();
-  document.getElementById('lines').getContext('2d').clearRect(0, 0, c.width, c.height);
+  document.getElementById('lines').getContext('2d').clearRect(0, 0, document.getElementById('lines').width, document.getElementById('lines').height);
   for (let i = 0; i < paths.length; i++)  drawPath(paths, i);
   for (var i = 0; i < charges.length; i++)  drawCharge(charges[i]);
 }
@@ -74,7 +74,7 @@ function calculateFieldLines() {
   let paths = [];
   for (let i = 0; i < charges.length; i++) {
     let angle = TAU * Math.random();
-    let radius = Math.sqrt(Math.abs(charges[i][2]));
+    let radius = Math.sqrt(Math.abs(charges[i][2]) + 2);
     for (let j = 0; j <= Math.abs(charges[i][2]); j++) {
       angle +=  TAU / Math.floor(1 + Math.abs(charges[i][2]));
       let newPoint = [charges[i][0] + radius * Math.cos(angle), charges[i][1] + radius * Math.sin(angle), charges[i][2]];
@@ -99,7 +99,7 @@ function calculatePath(startPoint) {
   let voltage = 0;
   for (var i = 0; i < charges.length; i++) {
     let distanceSquare = (startPoint[0] - charges[i][0])**2 + (startPoint[1] - charges[i][1])**2;
-    if (distanceSquare < Math.abs(charges[i][2]) - 1) return [startPoint];
+    if (distanceSquare < Math.abs(charges[i][2]) + 1) return [startPoint];
     addStrength(startPoint, fieldStrength, charges[i], distanceSquare);
     voltage += charges[i][2] / Math.sqrt(distanceSquare);
   }
@@ -131,6 +131,6 @@ function drawCharge(charge) {
   ctx.beginPath();
   if (Math.sign(charge[2]) === 1) ctx.fillStyle = "#ff0000";
   else ctx.fillStyle = "#0000ff";
-  ctx.arc(charge[0], charge[1], Math.sqrt(Math.abs(charge[2])), Math.sqrt(Math.abs(charge[2])), 0, TAU);
+  ctx.arc(charge[0], charge[1], Math.sqrt(Math.abs(charge[2]) + 2), Math.sqrt(Math.abs(charge[2])), 0, TAU);
   ctx.fill();
 }
